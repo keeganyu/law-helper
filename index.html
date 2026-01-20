@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>刑辩全能AI助手</title>
+    <style>
+        /* --- 基础样式 --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background-color: #f8fafc; color: #0f172a; position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; }
+        
+        /* --- 容器 --- */
+        #app-container { width: 100%; max-width: 450px; height: 100%; background: #fff; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        
+        /* --- 视图切换逻辑 --- */
+        .view { flex: 1; display: flex; flex-direction: column; overflow: hidden; display: none; height: 100%; }
+        .view.active { display: flex; }
+        .content-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
+
+        /* --- 首页仪表盘 --- */
+        .dashboard-header { background: #0f172a; color: white; padding: 30px 24px 80px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; flex-shrink: 0; }
+        .dashboard-grid { padding: 0 20px; margin-top: -60px; display: grid; gap: 16px; position: relative; z-index: 10; }
+        
+        .tool-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.1s; position: relative; overflow: hidden; }
+        .tool-card:active { transform: scale(0.98); background: #f8fafc; }
+        .tool-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; }
+        .tool-title { font-size: 18px; font-weight: bold; color: #0f172a; margin-bottom: 4px; }
+        .tool-desc { font-size: 12px; color: #64748b; line-height: 1.4; }
+        .tool-tag { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
+
+        /* --- 头部导航 --- */
+        .nav-header { background: #0f172a; color: white; padding: 16px; display: flex; align-items: center; flex-shrink: 0; }
+        .nav-title { flex: 1; text-align: center; font-size: 17px; font-weight: bold; margin-right: 32px; }
+        .nav-back { background: rgba(255,255,255,0.1); border: none; color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+
+        /* --- 通用组件 --- */
+        .btn { border: none; outline: none; cursor: pointer; font-size: 16px; font-weight: bold; border-radius: 12px; padding: 14px; width: 100%; display: flex; align-items: center; justify-content: center; }
+        .btn-primary { background: #2563eb; color: white; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+        
+        .input-group { margin-bottom: 20px; padding: 0 20px; }
+        .label { display: block; font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #334155; }
+        input[type="date"], input[type="number"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; background: white; -webkit-appearance: none; }
+        
+        /* --- 量刑滑块样式 --- */
+        .slider-container { padding: 0 20px; margin-bottom: 20px; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: white; border: 4px solid #2563eb; cursor: pointer; margin-top: -10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #e2e8f0; border-radius: 2px; }
+
+        /* --- 取保评估样式 --- */
+        .check-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
+        .check-item.checked { border-color: #2563eb; background: #eff6ff; }
+        .check-circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; margin-left: 10px; }
+        .check-item.checked .check-circle { border-color: #2563eb; background: #2563eb; }
+        .check-item.checked .check-circle::after { content: "✓"; color: white; font-size: 12px; }
+
+        /* --- 结果展示框 --- */
+        .result-card { margin: 20px; padding: 20px; border-radius: 16px; text-align: center; }
+        .result-score { font-size: 42px; font-weight: bold; margin: 10px 0; }
+        
+        /* --- 底部悬浮 --- */
+        .footer-fixed { flex-shrink: 0; padding: 12px 20px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 12px; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+
+        /* --- 弹窗 --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; align-items: flex-end; justify-content: center; }
+        .modal-overlay.open { display: flex; }
+        .modal-content { background: white; width: 100%; max-width: 450px; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 24px; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    
+    <!-- View: Dashboard (首页) -->
+    <div id="view-home" class="view active">
+        <div class="content-scroll">
+            <div class="dashboard-header">
+                <div style="font-size: 40px; margin-bottom: 10px;">⚖️</div>
+                <h1 style="margin: 0; font-size: 24px;">刑辩全能AI助手</h1>
+                <p style="margin: 8px 0 0; opacity: 0.8; font-size: 13px;">专业律师团队研发 · 刑事案件家属自助决策系统</p>
+            </div>
+            
+            <div class="dashboard-grid">
+                <!-- Card 1: 37 Days -->
+                <div class="tool-card" onclick="navigateTo('37days')">
+                    <div class="tool-tag" style="background:#dcfce7; color:#166534;">最常用</div>
+                    <div class="tool-icon" style="background:#eff6ff; color:#2563eb;">🕐</div>
+                    <div class="tool-title">黄金37天救援</div>
+                    <div class="tool-desc">测算侦查期关键时间节点，生成家属行动清单。</div>
+                </div>
+                
+                <!-- Card 2: Sentencing -->
+                <div class="tool-card" onclick="navigateTo('sentencing')">
+                    <div class="tool-tag" style="background:#fff7ed; color:#9a3412;">经济犯罪</div>
+                    <div class="tool-icon" style="background:#fff1f2; color:#be123c;">📉</div>
+                    <div class="tool-title">量刑智能模拟</div>
+                    <div class="tool-desc">输入涉案金额，一键预测法定刑期与降档机会。</div>
+                </div>
+
+                <!-- Card 3: Bail -->
+                <div class="tool-card" onclick="navigateTo('bail')">
+                    <div class="tool-tag" style="background:#f3e8ff; color:#6b21a8;">成功率</div>
+                    <div class="tool-icon" style="background:#f0fdf4; color:#15803d;">🔓</div>
+                    <div class="tool-title">取保候审评估</div>
+                    <div class="tool-desc">多维度分析取保概率，提供提升成功率建议。</div>
+                </div>
+
+                 <!-- Card 4: Centers -->
+                 <div class="tool-card" onclick="navigateTo('guide')">
+                    <div class="tool-tag" style="background:#e0f2fe; color:#0369a1;">浙江版</div>
+                    <div class="tool-icon" style="background:#f0f9ff; color:#0ea5e9;">🏢</div>
+                    <div class="tool-title">看守所导航</div>
+                    <div class="tool-desc">浙江全省看守所地址、电话、存钱衣物规定大全。</div>
+                </div>
+                
+                <!-- Contact Card -->
+                <div class="tool-card" style="background: linear-gradient(135deg, #1e293b, #0f172a); border:none;" onclick="openContactModal()">
+                    <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                        <div>
+                            <div class="tool-title" style="color:white; font-size:16px;">📞 呼叫律师紧急介入</div>
+                            <div class="tool-desc" style="color:#94a3b8;">24小时刑事法律援助热线</div>
+                        </div>
+                        <div style="background:white; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px;">➔</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="padding: 24px; text-align: center; color: #94a3b8; font-size: 12px;">
+                本工具仅供参考，不作为正式法律意见<br>具体案情请咨询律师
+            </div>
+        </div>
+    </div>
+
+    <!-- View: 37 Days (37天救援) -->
+    <div id="view-37days" class="view">
+        <div class="nav-header">
+            <button class="nav-back" onclick="navigateTo('home')">←</button>
+            <div class="nav-title">黄金37天救援系统</div>
+        </div>
+        <div class="content-scroll">
+            <div style="padding: 20px;">
+                <div class="input-group">
+                    <span class="label">被带走/拘留日期</span>
+                    <input type="date" id="date-37" onchange="calc37Days()">
+                </div>
+                <div id="result-37" style="display:none;">
+                    <div class="result-card" style="background:#f0f9ff; border:1px solid #bae6fd; text-align:left;">
+                        <div style="font-size:12px; color:#0369a1;">已拘留时间</div>
+                        <div style="font-size:32px; font-weight:bold; color:#0c4a6e; margin: 4px 0;"><span id="days-passed">0</span> <span style="font-size:14px;">天</span></div>
+                        <div id="status-tag" style="display:inline-block; padding:4px 8px; background:#0284c7; color:white; border-radius:4px; font-size:12px; font-weight:bold;">侦查阶段</div>
+                    </div>
+                    
+                    <div style="margin-top:20px;">
+                        <div class="label">📅 关键节点倒计时</div>
+                        <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                                <span style="font-weight:bold; color:#1e293b;">第30天 (提请批捕)</span>
+                                <span id="date-30" style="color:#64748b; font-size:14px;">--</span>
+                            </div>
+                            <div style="font-size:12px; color:#64748b;">在此之前需提交《取保候审申请书》</div>
+                        </div>
+                        <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                                <span style="font-weight:bold; color:#dc2626;">第37天 (检察院批捕)</span>
+                                <span id="date-37-end" style="color:#64748b; font-size:14px;">--</span>
+                            </div>
+                            <div style="font-size:12px; color:#64748b;">生死7天！需提交《不予批捕意见书》</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-fixed">
+            <button class="btn btn-primary" onclick="openContactModal()">我是家属，求助律师</button>
+        </div>
+    </div>
+
+    <!-- View: Sentencing (量刑模拟) -->
+    <div id="view-sentencing" class="view">
+        <div class="nav-header">
+            <button class="nav-back" onclick="navigateTo('home')">←</button>
+            <div class="nav-title">涉案金额量刑模拟</div>
+        </div>
+        <div class="content-scroll">
+            <div style="padding: 20px;">
+                <div class="input-group">
+                    <span class="label">涉嫌罪名</span>
+                    <select id="crime-select" onchange="calcSentencing()">
+                        <option value="fraud">诈骗罪</option>
+                        <option value="embezzlement">职务侵占罪</option>
+                        <option value="illegal">非法吸收公众存款</option>
+                    </select>
+                </div>
+
+                <div class="input-group" style="text-align:center;">
+                    <span class="label" style="text-align:left;">涉案金额 (元)</span>
+                    <div style="font-size:32px; font-weight:bold; color:#2563eb; margin:10px 0;">
+                        ¥ <span id="amount-display">80000</span>
+                    </div>
+                    <input type="range" id="amount-slider" min="0" max="1000000" step="5000" value="80000" oninput="updateAmount(this.value)">
+                </div>
+
+                <div class="result-card" id="sentencing-result" style="background:#fff7ed; border:1px solid #fed7aa;">
+                    <div style="font-size:12px; color:#9a3412;">预估法定刑幅度</div>
+                    <div class="result-score" id="penalty-text" style="color:#c2410c; font-size:24px;">3年以下 / 缓刑</div>
+                    <div style="font-size:12px; color:#9a3412;" id="threshold-desc">当前属于“数额较大”</div>
+                </div>
+                
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:16px; font-size:13px; color:#166534; line-height:1.5; margin-top:20px;">
+                    💡 <b>律师提示：</b><br>侦查阶段认定的金额往往包含"水分"（如未遂金额、重复流水）。核减金额是降低刑期的核心手段。
+                </div>
+            </div>
+        </div>
+        <div class="footer-fixed">
+            <button class="btn btn-primary" onclick="openContactModal()">咨询如何核减金额</button>
+        </div>
+    </div>
+
+    <!-- View: Bail (取保评估) -->
+    <div id="view-bail" class="view">
+        <div class="nav-header">
+            <button class="nav-back" onclick="navigateTo('home')">←</button>
+            <div class="nav-title">取保候审成功率评估</div>
+        </div>
+        <div class="content-scroll">
+            <div style="padding: 20px;">
+                <p style="font-size:12px; color:#64748b; margin-bottom:20px;">请勾选符合被拘留人情况的选项，系统将自动测算概率。</p>
+                
+                <div class="check-item" onclick="toggleCheck(this, 10)">
+                    <div>
+                        <div style="font-weight:bold; font-size:14px;">本地户籍 / 有固定住所</div>
+                        <div style="font-size:12px; color:#64748b;">社会危险性较低</div>
+                    </div>
+                    <div class="check-circle"></div>
+                </div>
+
+                <div class="check-item" onclick="toggleCheck(this, 15)">
+                    <div>
+                        <div style="font-weight:bold; font-size:14px;">初犯 / 偶犯</div>
+                        <div style="font-size:12px; color:#64748b;">无前科劣迹</div>
+                    </div>
+                    <div class="check-circle"></div>
+                </div>
+
+                <div class="check-item" onclick="toggleCheck(this, 20)">
+                    <div>
+                        <div style="font-weight:bold; font-size:14px;">已退赃 / 取得谅解</div>
+                        <div style="font-size:12px; color:#64748b;">最重要的加分项</div>
+                    </div>
+                    <div class="check-circle"></div>
+                </div>
+
+                <div class="check-item" onclick="toggleCheck(this, 30)">
+                    <div>
+                        <div style="font-weight:bold; font-size:14px;">患有严重疾病 / 怀孕哺乳</div>
+                        <div style="font-size:12px; color:#64748b;">人道主义取保理由</div>
+                    </div>
+                    <div class="check-circle"></div>
+                </div>
+
+                <div class="check-item" onclick="toggleCheck(this, 10)">
+                    <div>
+                        <div style="font-weight:bold; font-size:14px;">认罪认罚 / 口供稳定</div>
+                        <div style="font-size:12px; color:#64748b;">配合侦查态度良好</div>
+                    </div>
+                    <div class="check-circle"></div>
+                </div>
+
+                <div class="result-card" style="background:#fdf4ff; border:1px solid #f0abfc; margin-top:24px;">
+                    <div style="font-size:12px; color:#86198f;">预估取保成功率</div>
+                    <div class="result-score" id="bail-score" style="color:#a21caf;">20%</div>
+                    <div id="bail-advice" style="font-size:12px; color:#86198f;">基础概率较低，建议尽快寻找律师介入。</div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-fixed">
+            <button class="btn btn-primary" onclick="openContactModal()">获取取保申请书模板</button>
+        </div>
+    </div>
+
+    <!-- View: Guide (看守所指南 - 浙江版) -->
+    <div id="view-guide" class="view">
+        <div class="nav-header">
+            <button class="nav-back" onclick="navigateTo('home')">←</button>
+            <div class="nav-title">浙江省看守所大全</div>
+        </div>
+        <div class="content-scroll">
+            <div style="padding: 20px;">
+                <div class="input-group" style="padding:0;">
+                    <span class="label">选择看守所</span>
+                    <select id="center-select" onchange="updateCenterInfo()">
+                        <optgroup label="杭州市">
+                            <option value="hz_city">杭州市看守所</option>
+                            <option value="hz_shangcheng">上城区看守所</option>
+                            <option value="hz_gongshu">拱墅区看守所</option>
+                            <option value="hz_xihu">西湖区看守所</option>
+                            <option value="hz_yuhang">余杭区看守所</option>
+                            <option value="hz_xiaoshan">萧山区看守所</option>
+                            <option value="hz_linping">临平区看守所</option>
+                        </optgroup>
+                        <optgroup label="宁波市">
+                            <option value="nb_city">宁波市看守所</option>
+                            <option value="nb_haishu">海曙区看守所</option>
+                            <option value="nb_beilun">北仑区看守所</option>
+                            <option value="nb_cixi">慈溪市看守所</option>
+                            <option value="nb_yuyao">余姚市看守所</option>
+                        </optgroup>
+                        <optgroup label="温州市">
+                            <option value="wz_city">温州市看守所</option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <div id="center-info">
+                    <!-- JS Populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal (Global) -->
+    <div id="contact-modal" class="modal-overlay" onclick="closeContactModal(event)">
+        <div class="modal-content">
+            <h3 style="margin: 0 0 8px; font-size: 18px; font-weight: bold;">联系俞律师团队</h3>
+            <p style="margin: 0 0 24px; font-size: 13px; color: #64748b;">专业刑辩律师团队，24小时在线解答。</p>
+            
+            <a href="tel:13105565356" style="display: block; text-decoration: none;">
+                <button class="btn btn-primary" style="margin-bottom: 12px; background: #22c55e;">📞 拨打电话 (13105565356)</button>
+            </a>
+            <button class="btn btn-outline" style="background: #f8fafc;" onclick="copyWeChat()">📋 复制微信号</button>
+            <button class="btn" style="background:transparent; color:#94a3b8; font-size:14px; margin-top:8px;" onclick="closeContactModal()">暂不需要</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- Config ---
+    const LAWYER_INFO = { phone: '13105565356', wechat: '13105565356' };
+
+    // --- Data: Zhejiang Detention Centers ---
+    const DETENTION_CENTERS = {
+        // --- 杭州 ---
+        'hz_city': {
+            name: '杭州市看守所',
+            addr: '杭州市富阳区东洲街道鸡笼山村',
+            phone: '0571-87285200',
+            money: '每月2000元',
+            clothes: '不收带拉链/纽扣/绳索衣物，严禁金属。',
+            nav: 'https://j.map.baidu.com/8f/3Q' // 示例导航链接
+        },
+        'hz_shangcheng': {
+            name: '杭州市上城区看守所',
+            addr: '杭州市西湖区转塘街道象山村',
+            phone: '0571-87095842',
+            money: '2000元 (部分窗口可存)',
+            clothes: '检查严格，建议寄送卫衣/运动裤。',
+            nav: 'https://j.map.baidu.com/5c/jC'
+        },
+        'hz_gongshu': {
+            name: '杭州市拱墅区看守所',
+            addr: '杭州市拱墅区半山街道沈家桥',
+            phone: '0571-88171722',
+            money: '2000元',
+            clothes: '需去除所有金属配件。',
+            nav: 'https://j.map.baidu.com/7e/K5'
+        },
+        'hz_xihu': {
+            name: '杭州市西湖区看守所',
+            addr: '杭州市西湖区三墩镇振华路荡王头',
+            phone: '0571-88948200',
+            money: '每月2000元',
+            clothes: '不收带帽衫。',
+            nav: 'https://j.map.baidu.com/c2/fG' 
+        },
+        'hz_yuhang': {
+            name: '杭州市余杭区看守所',
+            addr: '杭州市余杭区仁和街道云会村',
+            phone: '0571-86137304',
+            money: '2000元',
+            clothes: '检查严格。',
+            nav: 'https://j.map.baidu.com/4a/xL'
+        },
+        'hz_xiaoshan': {
+            name: '杭州市萧山区看守所',
+            addr: '杭州市萧山区红垦农场红十五线',
+            phone: '0571-82677109',
+            money: '2000元',
+            clothes: '不收鞋子。',
+            nav: 'https://j.map.baidu.com/4a/xL'
+        },
+        'hz_linping': {
+            name: '杭州市临平区看守所',
+            addr: '杭州市临平区星桥街道',
+            phone: '0571-86137304', // 原余杭分出，电话可能沿用或需更新
+            money: '2000元',
+            clothes: '同余杭标准。',
+            nav: 'https://j.map.baidu.com/b5/hN'
+        },
+        // --- 宁波 ---
+        'nb_city': {
+            name: '宁波市看守所',
+            addr: '宁波市海曙区丽园北路489弄6号',
+            phone: '0574-81982114',
+            money: '2000元',
+            clothes: '建议邮局汇款。',
+            nav: 'https://j.map.baidu.com/1d/uP'
+        },
+        'nb_haishu': {
+            name: '宁波市海曙区看守所',
+            addr: '宁波市海曙区鄞江镇建岙村',
+            phone: '0574-55831127',
+            money: '2000元',
+            clothes: '无金属。',
+            nav: 'https://j.map.baidu.com/2f/yR'
+        },
+        'nb_beilun': {
+            name: '宁波市北仑区看守所',
+            addr: '宁波市北仑区新碶街道',
+            phone: '0574-86775753',
+            money: '2000元',
+            clothes: '检查严格。',
+            nav: 'https://j.map.baidu.com/e8/wT'
+        },
+        'nb_cixi': {
+            name: '慈溪市看守所',
+            addr: '慈溪市西二环北路181号',
+            phone: '0574-63331923',
+            money: '2000元',
+            clothes: '可寄送。',
+            nav: 'https://j.map.baidu.com/9b/iQ'
+        },
+        'nb_yuyao': {
+            name: '余姚市看守所',
+            addr: '余姚市兰江街道',
+            phone: '0574-62866288',
+            money: '2000元',
+            clothes: '可寄送。',
+            nav: 'https://j.map.baidu.com/3c/oM'
+        },
+        // --- 温州 ---
+        'wz_city': {
+            name: '温州市看守所',
+            addr: '温州市龙湾区沙城镇度山村',
+            phone: '0577-85980114',
+            money: '2000元',
+            clothes: '仅限必须衣物。',
+            nav: 'https://j.map.baidu.com/8d/pL'
+        }
+    };
+
+    // --- Navigation ---
+    function navigateTo(viewId) {
+        document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+        document.getElementById('view-' + viewId).classList.add('active');
+        if(viewId === '37days') calc37Days();
+        if(viewId === 'sentencing') calcSentencing();
+        if(viewId === 'guide') updateCenterInfo();
+    }
+
+    // --- Tool 1: 37 Days Logic ---
+    function calc37Days() {
+        const input = document.getElementById('date-37');
+        const resultDiv = document.getElementById('result-37');
+        if (!input.value) {
+            resultDiv.style.display = 'none';
+            return;
+        }
+        resultDiv.style.display = 'block';
+        const start = new Date(input.value);
+        const today = new Date();
+        const diff = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+        document.getElementById('days-passed').innerText = diff >= 0 ? diff : 0;
+        const addDays = (d, n) => { 
+            const x = new Date(d); 
+            x.setDate(x.getDate() + n); 
+            return x.toISOString().split('T')[0]; 
+        };
+        document.getElementById('date-30').innerText = addDays(start, 30);
+        document.getElementById('date-37-end').innerText = addDays(start, 37);
+        const tag = document.getElementById('status-tag');
+        if (diff > 37) {
+            tag.innerText = "批捕后/审判阶段";
+            tag.style.background = "#64748b";
+        } else if (diff > 30) {
+            tag.innerText = "高度紧急 (批捕审查中)";
+            tag.style.background = "#dc2626";
+        } else {
+            tag.innerText = "黄金救援期 (侦查阶段)";
+            tag.style.background = "#0284c7";
+        }
+    }
+
+    // --- Tool 2: Sentencing Logic ---
+    const SENTENCING_DATA = {
+        'fraud': [ {l:3000, t:'3年以下'}, {l:30000, t:'3-10年'}, {l:500000, t:'10年以上'} ],
+        'embezzlement': [ {l:30000, t:'3年以下'}, {l:1000000, t:'3-10年'}, {l:999999999, t:'10年以上'} ],
+        'illegal': [ {l:1000000, t:'3年以下'}, {l:5000000, t:'3-10年'}, {l:999999999, t:'10年以上'} ]
+    };
+    function updateAmount(val) {
+        document.getElementById('amount-display').innerText = val;
+        calcSentencing();
+    }
+    function calcSentencing() {
+        const type = document.getElementById('crime-select').value;
+        const amount = parseInt(document.getElementById('amount-slider').value);
+        const rules = SENTENCING_DATA[type];
+        let result = "未达立案标准";
+        let desc = "建议争取行政处罚";
+        if (amount >= rules[0].l) { result = rules[0].t; desc = "数额较大"; }
+        if (amount >= rules[1].l) { result = rules[1].t; desc = "数额巨大"; }
+        if (amount >= rules[2].l) { result = rules[2].t; desc = "数额特别巨大"; }
+        document.getElementById('penalty-text').innerText = result;
+        document.getElementById('threshold-desc').innerText = "当前区间：" + desc;
+    }
+
+    // --- Tool 3: Bail Logic ---
+    let bailBaseScore = 20;
+    function toggleCheck(el, score) {
+        el.classList.toggle('checked');
+        updateBailScore();
+    }
+    function updateBailScore() {
+        let currentScore = bailBaseScore;
+        const items = document.querySelectorAll('.check-item');
+        if (items[0].classList.contains('checked')) currentScore += 10;
+        if (items[1].classList.contains('checked')) currentScore += 15;
+        if (items[2].classList.contains('checked')) currentScore += 30;
+        if (items[3].classList.contains('checked')) currentScore += 20;
+        if (items[4].classList.contains('checked')) currentScore += 5;
+        if (currentScore > 95) currentScore = 95;
+        document.getElementById('bail-score').innerText = currentScore + "%";
+        let advice = "";
+        if (currentScore < 40) advice = "成功率较低，必须寻找非常规突破口。";
+        else if (currentScore < 70) advice = "有一定机会，重点完善《羁押必要性审查》材料。";
+        else advice = "成功率较高，建议立刻委托律师！";
+        document.getElementById('bail-advice').innerText = advice;
+    }
+
+    // --- Tool 4: Center Info Logic ---
+    function updateCenterInfo() {
+        const key = document.getElementById('center-select').value;
+        const info = DETENTION_CENTERS[key];
+        const html = `
+            <div style="background:#2563eb; color:white; padding:20px; border-radius:16px; margin-bottom:16px; box-shadow:0 4px 10px rgba(37,99,235,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <h2 style="margin:0 0 8px; font-size:20px; flex:1;">${info.name}</h2>
+                    <a href="${info.nav}" target="_blank" style="background:rgba(255,255,255,0.2); padding:6px 10px; border-radius:6px; color:white; text-decoration:none; font-size:12px; font-weight:bold;">
+                        📍 导航
+                    </a>
+                </div>
+                <div style="font-size:13px; opacity:0.9; margin-bottom:12px;">地址：${info.addr}</div>
+                <a href="tel:${info.phone}" style="display:inline-block; background:white; color:#2563eb; padding:8px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:bold;">
+                    📞 拨打 ${info.phone}
+                </a>
+            </div>
+            
+            <div style="background:white; border-radius:16px; border:1px solid #e2e8f0; overflow:hidden;">
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center;">
+                    <div style="width:36px; height:36px; background:#dcfce7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-right:12px; font-size:18px;">💰</div>
+                    <div>
+                        <div style="font-size:12px; color:#64748b;">存款规定</div>
+                        <div style="font-size:15px; font-weight:bold;">${info.money}</div>
+                    </div>
+                </div>
+                <div style="padding:16px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center;">
+                     <div style="width:36px; height:36px; background:#ffedd5; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-right:12px; font-size:18px;">👕</div>
+                    <div>
+                        <div style="font-size:12px; color:#64748b;">衣物规定</div>
+                        <div style="font-size:15px; font-weight:bold;">${info.clothes}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top:16px; background:#fefce8; border:1px solid #fef9c3; color:#854d0e; padding:16px; border-radius:12px; font-size:13px; line-height:1.6;">
+                <b>⚠️ 律师特别提示：</b><br>
+                1. 浙江地区部分看守所（如杭州）支持邮局汇款，存款上限通常为2000-3000元。<br>
+                2. 送衣物必须去除所有金属配件（拉链头、纽扣、金属丝），否则会被拒收。<br>
+                3. 眼镜必须是全树脂（包括镜框），不能有金属螺丝。
+            </div>
+        `;
+        document.getElementById('center-info').innerHTML = html;
+    }
+
+    // --- Modal Logic ---
+    function openContactModal() {
+        document.getElementById('contact-modal').classList.add('open');
+    }
+    function closeContactModal(e) {
+        if (!e || e.target.id === 'contact-modal' || e.target.tagName === 'BUTTON') {
+            document.getElementById('contact-modal').classList.remove('open');
+        }
+    }
+    function copyWeChat() {
+        const el = document.createElement('textarea');
+        el.value = LAWYER_INFO.wechat;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert('微信号已复制');
+        closeContactModal();
+    }
+    
+    // Init
+    calcSentencing();
+</script>
+
+</body>
+</html>
