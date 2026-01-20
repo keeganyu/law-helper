@@ -112,7 +112,7 @@
                     <div class="tool-tag" style="background:#e0f2fe; color:#0369a1;">浙江版</div>
                     <div class="tool-icon" style="background:#f0f9ff; color:#0ea5e9;">🏢</div>
                     <div class="tool-title">看守所导航</div>
-                    <div class="tool-desc">浙江全省看守所地址、电话、存钱衣物规定大全。</div>
+                    <div class="tool-desc">浙江全省看守所地址、电话、一键高德导航。</div>
                 </div>
                 
                 <!-- Contact Card -->
@@ -340,7 +340,8 @@
     // --- Config ---
     const LAWYER_INFO = { phone: '13105565356', wechat: '13105565356' };
 
-    // --- Data: Zhejiang Detention Centers ---
+    // --- Data: Zhejiang Detention Centers with Gaode Navigation Links ---
+    // 导航链接格式: https://uri.amap.com/navigation?to={lng},{lat},{name}&mode=car&callnative=1
     const DETENTION_CENTERS = {
         // --- 杭州 ---
         'hz_city': {
@@ -349,7 +350,7 @@
             phone: '0571-87285200',
             money: '每月2000元',
             clothes: '不收带拉链/纽扣/绳索衣物，严禁金属。',
-            nav: 'https://j.map.baidu.com/8f/3Q' // 示例导航链接
+            nav: 'https://uri.amap.com/navigation?to=119.988626,30.072972,杭州市看守所&mode=car&callnative=1'
         },
         'hz_shangcheng': {
             name: '杭州市上城区看守所',
@@ -357,7 +358,7 @@
             phone: '0571-87095842',
             money: '2000元 (部分窗口可存)',
             clothes: '检查严格，建议寄送卫衣/运动裤。',
-            nav: 'https://j.map.baidu.com/5c/jC'
+            nav: 'https://uri.amap.com/navigation?to=120.070732,30.140855,杭州市上城区看守所&mode=car&callnative=1'
         },
         'hz_gongshu': {
             name: '杭州市拱墅区看守所',
@@ -365,7 +366,7 @@
             phone: '0571-88171722',
             money: '2000元',
             clothes: '需去除所有金属配件。',
-            nav: 'https://j.map.baidu.com/7e/K5'
+            nav: 'https://uri.amap.com/navigation?to=120.191763,30.365675,杭州市拱墅区看守所&mode=car&callnative=1'
         },
         'hz_xihu': {
             name: '杭州市西湖区看守所',
@@ -373,7 +374,7 @@
             phone: '0571-88948200',
             money: '每月2000元',
             clothes: '不收带帽衫。',
-            nav: 'https://j.map.baidu.com/c2/fG' 
+            nav: 'https://uri.amap.com/navigation?to=120.060196,30.315904,杭州市西湖区看守所&mode=car&callnative=1' 
         },
         'hz_yuhang': {
             name: '杭州市余杭区看守所',
@@ -381,7 +382,7 @@
             phone: '0571-86137304',
             money: '2000元',
             clothes: '检查严格。',
-            nav: 'https://j.map.baidu.com/4a/xL'
+            nav: 'https://uri.amap.com/navigation?to=120.086088,30.432657,杭州市余杭区看守所&mode=car&callnative=1'
         },
         'hz_xiaoshan': {
             name: '杭州市萧山区看守所',
@@ -389,15 +390,15 @@
             phone: '0571-82677109',
             money: '2000元',
             clothes: '不收鞋子。',
-            nav: 'https://j.map.baidu.com/4a/xL'
+            nav: 'https://uri.amap.com/navigation?to=120.364436,30.231945,杭州市萧山区看守所&mode=car&callnative=1'
         },
         'hz_linping': {
             name: '杭州市临平区看守所',
             addr: '杭州市临平区星桥街道',
-            phone: '0571-86137304', // 原余杭分出，电话可能沿用或需更新
+            phone: '0571-86137304', 
             money: '2000元',
             clothes: '同余杭标准。',
-            nav: 'https://j.map.baidu.com/b5/hN'
+            nav: 'https://uri.amap.com/navigation?to=120.262846,30.407983,杭州市临平区看守所&mode=car&callnative=1'
         },
         // --- 宁波 ---
         'nb_city': {
@@ -406,7 +407,7 @@
             phone: '0574-81982114',
             money: '2000元',
             clothes: '建议邮局汇款。',
-            nav: 'https://j.map.baidu.com/1d/uP'
+            nav: 'https://uri.amap.com/navigation?to=121.517333,29.897257,宁波市看守所&mode=car&callnative=1'
         },
         'nb_haishu': {
             name: '宁波市海曙区看守所',
@@ -414,7 +415,7 @@
             phone: '0574-55831127',
             money: '2000元',
             clothes: '无金属。',
-            nav: 'https://j.map.baidu.com/2f/yR'
+            nav: 'https://uri.amap.com/navigation?to=121.368421,29.831518,宁波市海曙区看守所&mode=car&callnative=1'
         },
         'nb_beilun': {
             name: '宁波市北仑区看守所',
@@ -422,7 +423,7 @@
             phone: '0574-86775753',
             money: '2000元',
             clothes: '检查严格。',
-            nav: 'https://j.map.baidu.com/e8/wT'
+            nav: 'https://uri.amap.com/navigation?to=121.844781,29.932973,宁波市北仑区看守所&mode=car&callnative=1'
         },
         'nb_cixi': {
             name: '慈溪市看守所',
@@ -430,7 +431,7 @@
             phone: '0574-63331923',
             money: '2000元',
             clothes: '可寄送。',
-            nav: 'https://j.map.baidu.com/9b/iQ'
+            nav: 'https://uri.amap.com/navigation?to=121.267156,30.198357,慈溪市看守所&mode=car&callnative=1'
         },
         'nb_yuyao': {
             name: '余姚市看守所',
@@ -438,7 +439,7 @@
             phone: '0574-62866288',
             money: '2000元',
             clothes: '可寄送。',
-            nav: 'https://j.map.baidu.com/3c/oM'
+            nav: 'https://uri.amap.com/navigation?to=121.139634,30.034789,余姚市看守所&mode=car&callnative=1'
         },
         // --- 温州 ---
         'wz_city': {
@@ -447,7 +448,7 @@
             phone: '0577-85980114',
             money: '2000元',
             clothes: '仅限必须衣物。',
-            nav: 'https://j.map.baidu.com/8d/pL'
+            nav: 'https://uri.amap.com/navigation?to=120.789212,27.915833,温州市看守所&mode=car&callnative=1'
         }
     };
 
@@ -547,8 +548,8 @@
             <div style="background:#2563eb; color:white; padding:20px; border-radius:16px; margin-bottom:16px; box-shadow:0 4px 10px rgba(37,99,235,0.3);">
                 <div style="display:flex; justify-content:space-between; align-items:start;">
                     <h2 style="margin:0 0 8px; font-size:20px; flex:1;">${info.name}</h2>
-                    <a href="${info.nav}" target="_blank" style="background:rgba(255,255,255,0.2); padding:6px 10px; border-radius:6px; color:white; text-decoration:none; font-size:12px; font-weight:bold;">
-                        📍 导航
+                    <a href="${info.nav}" target="_blank" style="background:rgba(255,255,255,0.2); padding:6px 10px; border-radius:6px; color:white; text-decoration:none; font-size:12px; font-weight:bold; display:flex; align-items:center;">
+                        <span style="font-size:16px; margin-right:4px;">🗺️</span> 高德导航
                     </a>
                 </div>
                 <div style="font-size:13px; opacity:0.9; margin-bottom:12px;">地址：${info.addr}</div>
