@@ -340,8 +340,7 @@
     // --- Config ---
     const LAWYER_INFO = { phone: '13105565356', wechat: '13105565356' };
 
-    // --- Data: Zhejiang Detention Centers with Gaode Navigation Links ---
-    // 导航链接格式: https://uri.amap.com/navigation?to={lng},{lat},{name}&mode=car&callnative=1
+    // --- Data: Zhejiang Detention Centers with Coords ---
     const DETENTION_CENTERS = {
         // --- 杭州 ---
         'hz_city': {
@@ -350,7 +349,7 @@
             phone: '0571-87285200',
             money: '每月2000元',
             clothes: '不收带拉链/纽扣/绳索衣物，严禁金属。',
-            nav: 'https://uri.amap.com/navigation?to=119.988626,30.072972,杭州市看守所&mode=car&callnative=1'
+            lng: 119.988626, lat: 30.072972
         },
         'hz_shangcheng': {
             name: '杭州市上城区看守所',
@@ -358,7 +357,7 @@
             phone: '0571-87095842',
             money: '2000元 (部分窗口可存)',
             clothes: '检查严格，建议寄送卫衣/运动裤。',
-            nav: 'https://uri.amap.com/navigation?to=120.070732,30.140855,杭州市上城区看守所&mode=car&callnative=1'
+            lng: 120.070732, lat: 30.140855
         },
         'hz_gongshu': {
             name: '杭州市拱墅区看守所',
@@ -366,7 +365,7 @@
             phone: '0571-88171722',
             money: '2000元',
             clothes: '需去除所有金属配件。',
-            nav: 'https://uri.amap.com/navigation?to=120.191763,30.365675,杭州市拱墅区看守所&mode=car&callnative=1'
+            lng: 120.191763, lat: 30.365675
         },
         'hz_xihu': {
             name: '杭州市西湖区看守所',
@@ -374,7 +373,7 @@
             phone: '0571-88948200',
             money: '每月2000元',
             clothes: '不收带帽衫。',
-            nav: 'https://uri.amap.com/navigation?to=120.060196,30.315904,杭州市西湖区看守所&mode=car&callnative=1' 
+            lng: 120.060196, lat: 30.315904
         },
         'hz_yuhang': {
             name: '杭州市余杭区看守所',
@@ -382,7 +381,7 @@
             phone: '0571-86137304',
             money: '2000元',
             clothes: '检查严格。',
-            nav: 'https://uri.amap.com/navigation?to=120.086088,30.432657,杭州市余杭区看守所&mode=car&callnative=1'
+            lng: 120.086088, lat: 30.432657
         },
         'hz_xiaoshan': {
             name: '杭州市萧山区看守所',
@@ -390,7 +389,7 @@
             phone: '0571-82677109',
             money: '2000元',
             clothes: '不收鞋子。',
-            nav: 'https://uri.amap.com/navigation?to=120.364436,30.231945,杭州市萧山区看守所&mode=car&callnative=1'
+            lng: 120.364436, lat: 30.231945
         },
         'hz_linping': {
             name: '杭州市临平区看守所',
@@ -398,7 +397,7 @@
             phone: '0571-86137304', 
             money: '2000元',
             clothes: '同余杭标准。',
-            nav: 'https://uri.amap.com/navigation?to=120.262846,30.407983,杭州市临平区看守所&mode=car&callnative=1'
+            lng: 120.262846, lat: 30.407983
         },
         // --- 宁波 ---
         'nb_city': {
@@ -407,7 +406,7 @@
             phone: '0574-81982114',
             money: '2000元',
             clothes: '建议邮局汇款。',
-            nav: 'https://uri.amap.com/navigation?to=121.517333,29.897257,宁波市看守所&mode=car&callnative=1'
+            lng: 121.517333, lat: 29.897257
         },
         'nb_haishu': {
             name: '宁波市海曙区看守所',
@@ -415,7 +414,7 @@
             phone: '0574-55831127',
             money: '2000元',
             clothes: '无金属。',
-            nav: 'https://uri.amap.com/navigation?to=121.368421,29.831518,宁波市海曙区看守所&mode=car&callnative=1'
+            lng: 121.368421, lat: 29.831518
         },
         'nb_beilun': {
             name: '宁波市北仑区看守所',
@@ -423,7 +422,7 @@
             phone: '0574-86775753',
             money: '2000元',
             clothes: '检查严格。',
-            nav: 'https://uri.amap.com/navigation?to=121.844781,29.932973,宁波市北仑区看守所&mode=car&callnative=1'
+            lng: 121.844781, lat: 29.932973
         },
         'nb_cixi': {
             name: '慈溪市看守所',
@@ -431,7 +430,7 @@
             phone: '0574-63331923',
             money: '2000元',
             clothes: '可寄送。',
-            nav: 'https://uri.amap.com/navigation?to=121.267156,30.198357,慈溪市看守所&mode=car&callnative=1'
+            lng: 121.267156, lat: 30.198357
         },
         'nb_yuyao': {
             name: '余姚市看守所',
@@ -439,7 +438,7 @@
             phone: '0574-62866288',
             money: '2000元',
             clothes: '可寄送。',
-            nav: 'https://uri.amap.com/navigation?to=121.139634,30.034789,余姚市看守所&mode=car&callnative=1'
+            lng: 121.139634, lat: 30.034789
         },
         // --- 温州 ---
         'wz_city': {
@@ -448,7 +447,7 @@
             phone: '0577-85980114',
             money: '2000元',
             clothes: '仅限必须衣物。',
-            nav: 'https://uri.amap.com/navigation?to=120.789212,27.915833,温州市看守所&mode=car&callnative=1'
+            lng: 120.789212, lat: 27.915833
         }
     };
 
@@ -540,7 +539,39 @@
         document.getElementById('bail-advice').innerText = advice;
     }
 
-    // --- Tool 4: Center Info Logic ---
+    // --- Tool 4: Center Info Logic (Enhanced Navigation) ---
+    function openGaodeNav(lng, lat, name) {
+        const isiOS = !!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);
+        const isAndroid = navigator.userAgent.indexOf('Android') > -1 || navigator.userAgent.indexOf('Adr') > -1;
+        
+        let schema = '';
+        // 尝试直接使用 App 协议唤起
+        if (isiOS) {
+            schema = `iosamap://navi?sourceApplication=lawhelper&poiname=${name}&lat=${lat}&lon=${lng}&dev=0&style=2`;
+        } else if (isAndroid) {
+            schema = `androidamap://navi?sourceApplication=lawhelper&poiname=${name}&lat=${lat}&lon=${lng}&dev=0&style=2`;
+        }
+        
+        // 兜底网页链接
+        const webUrl = `https://uri.amap.com/navigation?to=${lng},${lat},${name}&mode=car&callnative=1`;
+
+        if (schema) {
+            // 尝试跳转 App
+            window.location.href = schema;
+            
+            // 如果 App 没打开，2秒后跳转网页版 (简单兜底)
+            setTimeout(function() {
+                // 只有当页面还在前台时才跳转，防止 App 打开后回来又跳网页
+                if (!document.hidden) {
+                    window.location.href = webUrl;
+                }
+            }, 2000);
+        } else {
+            // PC 或其他环境直接去网页
+            window.location.href = webUrl;
+        }
+    }
+
     function updateCenterInfo() {
         const key = document.getElementById('center-select').value;
         const info = DETENTION_CENTERS[key];
@@ -548,7 +579,8 @@
             <div style="background:#2563eb; color:white; padding:20px; border-radius:16px; margin-bottom:16px; box-shadow:0 4px 10px rgba(37,99,235,0.3);">
                 <div style="display:flex; justify-content:space-between; align-items:start;">
                     <h2 style="margin:0 0 8px; font-size:20px; flex:1;">${info.name}</h2>
-                    <a href="${info.nav}" target="_blank" style="background:rgba(255,255,255,0.2); padding:6px 10px; border-radius:6px; color:white; text-decoration:none; font-size:12px; font-weight:bold; display:flex; align-items:center;">
+                    <!-- 修改为点击调用 openGaodeNav 函数 -->
+                    <a href="#" onclick="openGaodeNav(${info.lng}, ${info.lat}, '${info.name}'); return false;" style="background:rgba(255,255,255,0.2); padding:6px 10px; border-radius:6px; color:white; text-decoration:none; font-size:12px; font-weight:bold; display:flex; align-items:center;">
                         <span style="font-size:16px; margin-right:4px;">🗺️</span> 高德导航
                     </a>
                 </div>
